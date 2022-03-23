@@ -4,28 +4,43 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
+    public float MoveSpeed;
+    public float RangeDistance;
+
     [HideInInspector]
-    public Vector3 Velocity;
+    public Effect Effect;
+    [HideInInspector]
+    public Team Team;
+    [HideInInspector]
+    public Vector3 Direction;
 
+    private Vector3 Velocity;
 
-    private Character[] Targets;
+    public bool Rotate;
+
+    private const float RotateSpeed = 1f;
 
     void Start()
     {
-        
+        Velocity = Direction * MoveSpeed;
     }
 
     void Update()
     {
         transform.position += Velocity * Time.deltaTime;
+        if(Rotate) transform.Rotate(new Vector3(0, 0, RotateSpeed));
 
-        Targets = FindObjectsOfType<Enemy>();
-        foreach (var target in Targets)
+        var allCharacters = FindObjectsOfType<Character>();
+        foreach (var character in allCharacters)
         {
-            var distanceToTarget = Vector3.Distance(target.transform.position, transform.position);
-            if (distanceToTarget < 0.5f)
+            if (character.Team != Team)
             {
-                target.GetHit(transform.position, 1f);
+                var distanceToTarget = Vector3.Distance(character.transform.position, transform.position);
+                if (distanceToTarget < RangeDistance)
+                {
+                    character.TakeEffect(Effect);
+                    break;
+                }
             }
         }
     }

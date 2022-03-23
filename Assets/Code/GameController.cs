@@ -5,22 +5,24 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
     public GameObject EnemyPrefab;
+    public GameObject Player1;
 
     private float EnemySpawnIntervalTimer;
-    private float EnemySpawnInterval = 2f;
+    private float EnemySpawnInterval = 1f;
     private Vector3 ScreenBounds;
 
     // Start is called before the first frame update
     void Start()
     {
         ScreenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
+
+        Instantiate(Player1, Vector2.zero, Quaternion.identity);
     }
 
     // Update is called once per frame
     void Update()
     {
         EnemySpawnIntervalTimer -= Time.deltaTime;
-        EnemySpawnInterval -= Time.deltaTime * 0.1f;
 
         if (EnemySpawnIntervalTimer < 0)
         {
