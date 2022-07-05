@@ -105,7 +105,7 @@ MonoBehaviour:
     Cooldown: 0
     RangeDistance: 1
     RangeAngle: 180
-    MaxTargets: 0
+    MaxTargets: 3
     Projectile: {fileID: 0}
     Effect:
       Damage: 50

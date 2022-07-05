@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    public GameObject EnemyPrefab;
+    public GameObject Enemy;
     public GameObject Player1;
 
     private float EnemySpawnIntervalTimer;
@@ -45,7 +45,7 @@ public class GameController : MonoBehaviour
 
             //var ballCollection = GameObject.FindGameObjectsWithTag("BallCollection")[0];
             var spawnPoint = new Vector3(spawnPointX, spawnPointY );
-            Instantiate(EnemyPrefab, spawnPoint, Quaternion.identity);
+            Instantiate(Enemy, spawnPoint, Quaternion.identity);
         }
     }
 }

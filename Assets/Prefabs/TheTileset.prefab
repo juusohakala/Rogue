@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4981584731736291797
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 71687895330273218}
+  - component: {fileID: 4095934760763917330}
+  m_Layer: 0
+  m_Name: TheTileset
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &71687895330273218
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4981584731736291797}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4095934760763917330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4981584731736291797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be3a1ee3d41b4942b61c20ac6e34148, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <Middle>k__BackingField:
+  - {fileID: -73183750, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  Top:
+  - {fileID: 892257389, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  Right:
+  - {fileID: -537056261, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  Bottom:
+  - {fileID: 1605305618, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  Left:
+  - {fileID: 861622062, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  TopRight:
+  - {fileID: 1539218572, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  BottomRight:
+  - {fileID: 1035141486, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  BottomLeft:
+  - {fileID: -1839369450, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  TopLeft:
+  - {fileID: -1737144186, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  InsideTopRight:
+  - {fileID: -989069819, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  InsideBottomRight:
+  - {fileID: 1104483203, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  InsideBottomLeft:
+  - {fileID: 1007624783, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}
+  InsideTopLeft:
+  - {fileID: 165421651, guid: 3c2f86edecf28ab439224c2681da5d63, type: 3}

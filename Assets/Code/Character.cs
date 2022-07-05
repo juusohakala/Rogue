@@ -24,6 +24,7 @@ public class Character : MonoBehaviour
     public SpriteRenderer Sprite;
     public int MaxHealth;
     public float MoveSpeed;
+    public Action[] Actions;
     //public Weapon[] Weapons;
 
     private const float TookDamageBlinkTime = 0.05f;
@@ -38,8 +39,6 @@ public class Character : MonoBehaviour
     //NPC specific:
     private Character Target;
 
-    //Player specific:
-    public Action[] Actions;
 
     public Dictionary<string, Action> Actions2;
 
