@@ -28,7 +28,7 @@ public class AutoTileset : MonoBehaviour
     [field: SerializeField] public Sprite[] InsideTopLeft { get; set; }
 
 
-    public enum BitMask
+    public enum TilePosition
     {
         Middle,
 
@@ -48,13 +48,13 @@ public class AutoTileset : MonoBehaviour
         InsideTopLeft
     }
 
-    public Dictionary<BitMask, Tile[]> Tiles { get; set; } 
+    public Dictionary<TilePosition, Tile[]> Tiles { get; set; } 
 
     void Awake()
     {
-        Tiles = new Dictionary<BitMask, Tile[]>();
+        Tiles = new Dictionary<TilePosition, Tile[]>();
 
-        foreach (int e in Enum.GetValues(typeof(BitMask)))
+        foreach (int e in Enum.GetValues(typeof(TilePosition)))
         {
 
             //var propName = ((BitMask)e).ToString();
@@ -64,13 +64,13 @@ public class AutoTileset : MonoBehaviour
             //var propValue = this.GetType().GetProperty(((BitMask)e).ToString()).GetValue(this);
 
 
-            var sprites = (Array)this.GetType().GetProperty(((BitMask)e).ToString()).GetValue(this);
+            var sprites = (Array)this.GetType().GetProperty(((TilePosition)e).ToString()).GetValue(this);
 
-            Tiles.Add((BitMask)e, new Tile[sprites.Length]);
+            Tiles.Add((TilePosition)e, new Tile[sprites.Length]);
             for (var i = 0; i < sprites.Length; i++)
             {
-                Tiles[(BitMask)e][i] = ScriptableObject.CreateInstance<Tile>();
-                Tiles[(BitMask)e][i].sprite = (Sprite)sprites.GetValue(i);
+                Tiles[(TilePosition)e][i] = ScriptableObject.CreateInstance<Tile>();
+                Tiles[(TilePosition)e][i].sprite = (Sprite)sprites.GetValue(i);
             }
         }
     }
