@@ -56,14 +56,6 @@ public class AutoTileset : MonoBehaviour
 
         foreach (int e in Enum.GetValues(typeof(TilePosition)))
         {
-
-            //var propName = ((BitMask)e).ToString();
-
-            //var type = this.GetType();
-            //var prop = this.GetType().GetProperty(((BitMask)e).ToString());
-            //var propValue = this.GetType().GetProperty(((BitMask)e).ToString()).GetValue(this);
-
-
             var sprites = (Array)this.GetType().GetProperty(((TilePosition)e).ToString()).GetValue(this);
 
             Tiles.Add((TilePosition)e, new Tile[sprites.Length]);
@@ -73,11 +65,6 @@ public class AutoTileset : MonoBehaviour
                 Tiles[(TilePosition)e][i].sprite = (Sprite)sprites.GetValue(i);
             }
         }
-    }
-
-    void Update()
-    {
-
     }
 }
 

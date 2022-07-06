@@ -3,7 +3,11 @@ guid: bd72737f05be35c458d439d07d3b2c46
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - Camera: {instanceID: 0}
+  - AutoTileset: {fileID: 4095934760763917330, guid: 2b1e8b8f01f434447b26e7ecb7543cfd, type: 3}
+  - Over: {instanceID: 0}
+  - Under: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

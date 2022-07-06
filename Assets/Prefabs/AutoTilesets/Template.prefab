@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 71687895330273218}
   - component: {fileID: 4095934760763917330}
   m_Layer: 0
-  m_Name: TheTileset
+  m_Name: Template
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

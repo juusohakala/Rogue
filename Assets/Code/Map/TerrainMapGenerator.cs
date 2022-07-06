@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class MapGenerator : MonoBehaviour
+public class TerrainMapGenerator : MonoBehaviour
 {
     enum Terrain
     {
@@ -12,49 +12,12 @@ public class MapGenerator : MonoBehaviour
         Sand
     }
 
-    public enum Direction
-    {
-        Middle,
-
-        Top,
-        Right,
-        Bottom,
-        Left,
-
-        TopRight,
-        BottomRight,
-        BottomLeft,
-        TopLeft
-    }
-
-    public static readonly Dictionary<Direction, (int, int)> DirectionPosition
-        = new Dictionary<Direction, (int, int)>()
-    {
-        { Direction.Middle, (0,0) },
-
-        { Direction.Top, (0,1) },
-        { Direction.Right, (1,0) },
-        { Direction.Bottom, (0,-1) },
-        { Direction.Left, (-1,0) },
-
-        { Direction.TopRight, (1,1) },
-        { Direction.BottomRight, (1,-1) },
-        { Direction.BottomLeft, (-1,-1) },
-        { Direction.TopLeft, (-1,1) },
-    };
-
-
-
-    void GetTile(double x, double y)
-    {
-
-    }
 
     [Header("Camera:")]
     public Camera Camera;
 
     [Header("Tilesets:")]
-    public AutoTileset AutoTileset;
+    public AutoTileset[] AutoTilesets;
 
     [Header("Tilemaps:")]
     public Tilemap Over;
@@ -83,14 +46,12 @@ public class MapGenerator : MonoBehaviour
     private List<(int, int)> UnSettedTiles;
 
 
-    Terrain GetTerrain(int x, int y, Direction direction = Direction.Middle)
+    Terrain GetTerrain(int x, int y)
     {
-        var newX = x + DirectionPosition[direction].Item1;
-        var newY = y + DirectionPosition[direction].Item2;
 
-        if (TerrainMap.ContainsKey((newX, newY)))
+        if (TerrainMap.ContainsKey((x, y)))
         {
-            return TerrainMap[(newX, newY)];
+            return TerrainMap[(x, y)];
         }
 
         return Terrain.Empty;
@@ -109,19 +70,13 @@ public class MapGenerator : MonoBehaviour
         }
         else
         {
-            //if (TerrainMap[(x, y)] == Terrain.Sand)
-            //{
-            //    var tiles = AutoTileset.Tiles[AutoTileset.BitMask.Middle];
-            //    var randomTile = tiles[Random.Range(0, tiles.Length)];
-            //    Over.SetTile(new Vector3Int(x, y, 0), randomTile);
-            //}
 
             var tileX = x * 2;
             var tileY = y * 2;
 
 
 
-            var tilepos = AutoTileset.TilePosition.Middle;
+            
 
             var top = GetTerrain(x, y + 1);
             var right = GetTerrain(x + 1, y);
@@ -134,8 +89,12 @@ public class MapGenerator : MonoBehaviour
             var topLeft = GetTerrain(x - 1, y + 1);
 
 
+            // Terrains:
 
             var t = Terrain.Sand;
+
+            var tileset = AutoTilesets[0];
+            var tilepos = AutoTileset.TilePosition.Middle;
 
             if (GetTerrain(x, y) == t)
             {
@@ -153,7 +112,7 @@ public class MapGenerator : MonoBehaviour
                                 ? AutoTileset.TilePosition.Right
                                 : AutoTileset.TilePosition.TopRight;
 
-                Over.SetTile(new Vector3Int(tileX + 1, tileY + 1, 0), AutoTileset.Tiles[tilepos][0]);
+                Over.SetTile(new Vector3Int(tileX + 1, tileY + 1, 0), tileset.Tiles[tilepos][0]);
 
                 // Bottom Right tile
 
@@ -168,7 +127,7 @@ public class MapGenerator : MonoBehaviour
                                 ? AutoTileset.TilePosition.Right
                                 : AutoTileset.TilePosition.BottomRight;
 
-                Over.SetTile(new Vector3Int(tileX + 1, tileY, 0), AutoTileset.Tiles[tilepos][0]);
+                Over.SetTile(new Vector3Int(tileX + 1, tileY, 0), tileset.Tiles[tilepos][0]);
 
                 // Bottom Left tile
 
@@ -183,7 +142,7 @@ public class MapGenerator : MonoBehaviour
                                 ? AutoTileset.TilePosition.Left
                                 : AutoTileset.TilePosition.BottomLeft;
 
-                Over.SetTile(new Vector3Int(tileX, tileY, 0), AutoTileset.Tiles[tilepos][0]);
+                Over.SetTile(new Vector3Int(tileX, tileY, 0), tileset.Tiles[tilepos][0]);
 
                 // Top left tile
 
@@ -198,7 +157,7 @@ public class MapGenerator : MonoBehaviour
                                 ? AutoTileset.TilePosition.Left
                                 : AutoTileset.TilePosition.TopLeft;
 
-                Over.SetTile(new Vector3Int(tileX, tileY + 1, 0), AutoTileset.Tiles[tilepos][0]);
+                Over.SetTile(new Vector3Int(tileX, tileY + 1, 0), tileset.Tiles[tilepos][0]);
 
             }
         }
@@ -244,12 +203,38 @@ public class MapGenerator : MonoBehaviour
 
     }
 
+    void SetUnSettedTiles()
+    {
+        for (int i = UnSettedTiles.Count - 1; i >= 0; i--)
+        {
+            var x = UnSettedTiles[i].Item1;
+            var y = UnSettedTiles[i].Item2;
+            if (
+                      TerrainMap.ContainsKey((x, y + 1))
+                && TerrainMap.ContainsKey((x + 1, y + 1))
+                && TerrainMap.ContainsKey((x + 1, y))
+                && TerrainMap.ContainsKey((x + 1, y - 1))
+                && TerrainMap.ContainsKey((x, y - 1))
+                && TerrainMap.ContainsKey((x - 1, y - 1))
+                && TerrainMap.ContainsKey((x - 1, y))
+                && TerrainMap.ContainsKey((x - 1, y + 1)))
+            {
+                SetTiles(x, y);
+                UnSettedTiles.RemoveAt(i);
+            }
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         TerrainMap = new Dictionary<(int, int), Terrain>();
         UnSettedTiles = new List<(int, int)>();
-        AutoTileset = Instantiate(AutoTileset);
+        for (var i = 0; i < AutoTilesets.Length; i++)
+        {
+            AutoTilesets[i] = Instantiate(AutoTilesets[i]);
+        }
+        
 
         // Generate first map that just covers the camera
         CameraPositionInTerrainCellsWhenLastGenerate = Over.LocalToCell(Camera.transform.position);
@@ -262,11 +247,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        foreach (var i in TerrainMap.Keys)
-        {
-            SetTiles(i.Item1, i.Item2);
-        }
-
+        SetUnSettedTiles();
 
     }
 
@@ -291,7 +272,7 @@ public class MapGenerator : MonoBehaviour
             for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
             {
                 var y = cameraPosition.y + i;
-                SetTerrain(x, y, GenerateTerrain(x, y));
+                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
             }
             CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
             cameraMoved = true;
@@ -303,7 +284,7 @@ public class MapGenerator : MonoBehaviour
             for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
             {
                 var y = cameraPosition.y + i;
-                SetTerrain(x, y, GenerateTerrain(x, y));
+                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
             }
             CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
             cameraMoved = true;
@@ -315,7 +296,7 @@ public class MapGenerator : MonoBehaviour
             for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
             {
                 var x = cameraPosition.x + i;
-                SetTerrain(x, y, GenerateTerrain(x, y));
+                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
             }
             CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
             cameraMoved = true;
@@ -327,7 +308,7 @@ public class MapGenerator : MonoBehaviour
             for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
             {
                 var x = cameraPosition.x + i;
-                SetTerrain(x, y, GenerateTerrain(x, y));
+                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
             }
             CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
             cameraMoved = true;
@@ -337,28 +318,10 @@ public class MapGenerator : MonoBehaviour
         // good enough for now, can be optimized
         if (cameraMoved)
         {
-            for (int i = UnSettedTiles.Count - 1; i >= 0; i--)
-            {
-                var x = UnSettedTiles[i].Item1;
-                var y = UnSettedTiles[i].Item2;
-                if (
-                          TerrainMap.ContainsKey((x, y + 1))
-                    && TerrainMap.ContainsKey((x + 1, y + 1))
-                    && TerrainMap.ContainsKey((x + 1, y))
-                    && TerrainMap.ContainsKey((x + 1, y - 1))
-                    && TerrainMap.ContainsKey((x, y - 1))
-                    && TerrainMap.ContainsKey((x - 1, y - 1))
-                    && TerrainMap.ContainsKey((x - 1, y))
-                    && TerrainMap.ContainsKey((x - 1, y + 1)))
-                {
-                    SetTiles(x, y);
-                    UnSettedTiles.RemoveAt(i);
-                }
-            }
-
-
-            cameraMoved = false;
+            SetUnSettedTiles();
         }
 
+        cameraMoved = false;
     }
+
 }

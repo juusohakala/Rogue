@@ -584,7 +584,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Camera: {fileID: 519420031}
-  AutoTileset: {fileID: 4095934760763917330, guid: 2b1e8b8f01f434447b26e7ecb7543cfd, type: 3}
+  AutoTilesets:
+  - {fileID: 4095934760763917330, guid: 2b1e8b8f01f434447b26e7ecb7543cfd, type: 3}
   Over: {fileID: 882210262}
   Under: {fileID: 732258623}
   PerlinNoiseZoom: 25
