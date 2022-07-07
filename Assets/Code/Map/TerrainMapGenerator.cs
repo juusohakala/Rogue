@@ -1,327 +1,241 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
+
 
 public class TerrainMapGenerator : MonoBehaviour
 {
-    enum Terrain
-    {
-        Empty,
-        Grass,
-        Sand
-    }
+    //[Header("AutoTileMapper:")]
+    //public AutoTileMapper AutoTileMapper;
 
-
-    [Header("Camera:")]
-    public Camera Camera;
-
-    [Header("Tilesets:")]
-    public AutoTileset[] AutoTilesets;
-
-    [Header("Tilemaps:")]
-    public Tilemap Over;
-    public Tilemap Under;
+    [Header("TerrainMap:")]
+    public TerrainMap TerrainMap;
 
     [Header("Generator settings:")]
     public double PerlinNoiseZoom;
 
+    private Camera Camera;
+
+    private Dictionary<(int, int), bool> Chunks;
 
     /// <summary>
     /// These values should be big enough to cover visible play area when camera is zoomed out to max.
     /// These could be calculated from camera dimensions somehow but I don't care for now.
     /// Even numbers only!
     /// </summary>
-    private int MapMinWidth = 4;
-    private int MapMinHeight = 4;
+    private int MapMinWidth = 100;
+    private int MapMinHeight = 100;
 
+    private int ChunkWidth = 20;
+    private int ChunkHeight = 20;
 
-
-
+    private int ChunkCounter;
 
     private Vector3 CameraPositionInTerrainCellsWhenLastGenerate;
 
 
-    private Dictionary<(int, int), Terrain> TerrainMap;
-    private List<(int, int)> UnSettedTiles;
+    private double CameraPositionWhenLastGenerateX;
+    private double CameraPositionWhenLastGenerateY;
 
 
-    Terrain GetTerrain(int x, int y)
-    {
-
-        if (TerrainMap.ContainsKey((x, y)))
-        {
-            return TerrainMap[(x, y)];
-        }
-
-        return Terrain.Empty;
-    }
-
-
-    /// <summary>
-    /// Sets tiles by it's terrain and surrounding terrains.
-    /// </summary>
-    void SetTiles(int x, int y)
-    {
-        if (!TerrainMap.ContainsKey((x, y)))
-        {
-            Debug.LogWarning($"Tried to set tiles but terrain not found {(x, y)}");
-            return;
-        }
-        else
-        {
-
-            var tileX = x * 2;
-            var tileY = y * 2;
-
-
-
-            
-
-            var top = GetTerrain(x, y + 1);
-            var right = GetTerrain(x + 1, y);
-            var bottom = GetTerrain(x, y - 1);
-            var left = GetTerrain(x - 1, y);
-
-            var topRight = GetTerrain(x + 1, y + 1);
-            var bottomRight = GetTerrain(x + 1, y - 1);
-            var bottomLeft = GetTerrain(x - 1, y - 1);
-            var topLeft = GetTerrain(x - 1, y + 1);
-
-
-            // Terrains:
-
-            var t = Terrain.Sand;
-
-            var tileset = AutoTilesets[0];
-            var tilepos = AutoTileset.TilePosition.Middle;
-
-            if (GetTerrain(x, y) == t)
-            {
-
-                // Top Right tile
-
-                tilepos =
-                    (right == t && top == t)
-                        ? (topRight == t)
-                            ? AutoTileset.TilePosition.Middle
-                            : AutoTileset.TilePosition.InsideTopRight
-                        : (right == t)
-                            ? AutoTileset.TilePosition.Top
-                            : (top == t)
-                                ? AutoTileset.TilePosition.Right
-                                : AutoTileset.TilePosition.TopRight;
-
-                Over.SetTile(new Vector3Int(tileX + 1, tileY + 1, 0), tileset.Tiles[tilepos][0]);
-
-                // Bottom Right tile
-
-                tilepos =
-                    (right == t && bottom == t)
-                        ? (bottomRight == t)
-                            ? AutoTileset.TilePosition.Middle
-                            : AutoTileset.TilePosition.InsideBottomRight
-                        : (right == t)
-                            ? AutoTileset.TilePosition.Bottom
-                            : (bottom == t)
-                                ? AutoTileset.TilePosition.Right
-                                : AutoTileset.TilePosition.BottomRight;
-
-                Over.SetTile(new Vector3Int(tileX + 1, tileY, 0), tileset.Tiles[tilepos][0]);
-
-                // Bottom Left tile
-
-                tilepos =
-                    (left == t && bottom == t)
-                        ? (bottomLeft == t)
-                            ? AutoTileset.TilePosition.Middle
-                            : AutoTileset.TilePosition.InsideBottomLeft
-                        : (left == t)
-                            ? AutoTileset.TilePosition.Bottom
-                            : (bottom == t)
-                                ? AutoTileset.TilePosition.Left
-                                : AutoTileset.TilePosition.BottomLeft;
-
-                Over.SetTile(new Vector3Int(tileX, tileY, 0), tileset.Tiles[tilepos][0]);
-
-                // Top left tile
-
-                tilepos =
-                    (left == t && top == t)
-                        ? (topLeft == t)
-                            ? AutoTileset.TilePosition.Middle
-                            : AutoTileset.TilePosition.InsideTopLeft
-                        : (left == t)
-                            ? AutoTileset.TilePosition.Top
-                            : (top == t)
-                                ? AutoTileset.TilePosition.Left
-                                : AutoTileset.TilePosition.TopLeft;
-
-                Over.SetTile(new Vector3Int(tileX, tileY + 1, 0), tileset.Tiles[tilepos][0]);
-
-            }
-        }
-
-
-
-    }
-
-    /// <summary>
-    /// Sets a terrain.
-    /// </summary>
-    void SetTerrain(int x, int y, Terrain terrain)
-    {
-
-        if (TerrainMap.ContainsKey((x, y)))
-        {
-            Debug.LogWarning($"DataMap already has a key {(x, y)}");
-            return;
-        }
-        else
-        {
-            TerrainMap.Add((x, y), terrain);
-            UnSettedTiles.Add((x, y));
-        }
-
-    }
-
-    Terrain GenerateTerrain(int x, int y)
+    TerrainMap.Terrain GenerateTerrain(int x, int y)
     {
         var pnx = (float)(((double)x / MapMinWidth + 0.5) * PerlinNoiseZoom);
         var pny = (float)(((double)y / MapMinHeight + 0.5) * PerlinNoiseZoom);
 
         var noiseValueOfThePoint = Mathf.PerlinNoise(pnx, pny);
 
-        if (noiseValueOfThePoint > 0.5)
+        if (noiseValueOfThePoint < 0.3)
         {
-            return Terrain.Grass;
+            return TerrainMap.Terrain.Empty;
+        }
+        else if(noiseValueOfThePoint < 0.8)
+        {
+            return TerrainMap.Terrain.Blue;
         }
         else
         {
-            return Terrain.Sand;
+            return TerrainMap.Terrain.Red;
         }
 
     }
 
-    void SetUnSettedTiles()
+    void GenerateTerrainChunk(int chunkX, int chunkY)
     {
-        for (int i = UnSettedTiles.Count - 1; i >= 0; i--)
+        ChunkCounter++;
+        Chunks.Add((chunkX, chunkY), true);
+
+        var firstX = -ChunkWidth / 2 - 1 + chunkX * ChunkWidth;
+        var lastX = ChunkWidth / 2 + chunkX * ChunkWidth;
+
+        var firstY = -ChunkHeight / 2 - 1 + chunkY * ChunkHeight;
+        var lastY = ChunkHeight / 2 + chunkY * ChunkHeight;
+
+        for (var x = firstX; x <= lastX; x++)
         {
-            var x = UnSettedTiles[i].Item1;
-            var y = UnSettedTiles[i].Item2;
-            if (
-                      TerrainMap.ContainsKey((x, y + 1))
-                && TerrainMap.ContainsKey((x + 1, y + 1))
-                && TerrainMap.ContainsKey((x + 1, y))
-                && TerrainMap.ContainsKey((x + 1, y - 1))
-                && TerrainMap.ContainsKey((x, y - 1))
-                && TerrainMap.ContainsKey((x - 1, y - 1))
-                && TerrainMap.ContainsKey((x - 1, y))
-                && TerrainMap.ContainsKey((x - 1, y + 1)))
+            for (var y = firstY; y <= lastY; y++)
             {
-                SetTiles(x, y);
-                UnSettedTiles.RemoveAt(i);
+                if (TerrainMap.GetTerrain(x, y) == null) TerrainMap.SetTerrain(x, y, GenerateTerrain(x, y));
+
+                if (!(x == firstX || y == firstY || x == lastX || y == lastY))
+                {
+                    // not border
+                    TerrainMap.AddReadyKey((x, y));
+                }
             }
         }
+
     }
+
 
     // Start is called before the first frame update
     void Start()
     {
-        TerrainMap = new Dictionary<(int, int), Terrain>();
-        UnSettedTiles = new List<(int, int)>();
-        for (var i = 0; i < AutoTilesets.Length; i++)
-        {
-            AutoTilesets[i] = Instantiate(AutoTilesets[i]);
-        }
-        
+        Camera = Camera.main;
 
-        // Generate first map that just covers the camera
-        CameraPositionInTerrainCellsWhenLastGenerate = Over.LocalToCell(Camera.transform.position);
-        for (var x = -MapMinWidth / 2; x < MapMinWidth / 2; x++)
-        {
-            for (var y = -MapMinHeight / 2; y < MapMinHeight / 2; y++)
-            {
+        Chunks = new Dictionary<(int, int), bool>();
 
-                SetTerrain(x, y, GenerateTerrain(x, y));
-            }
-        }
+        // Generate first map to 0,0 that just covers the camera
 
-        SetUnSettedTiles();
+
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        var w = MapMinWidth / 2;
-        var h = MapMinHeight / 2;
-
-        var cameraMoved = false;
 
 
         // here could be something to optimize :-)
 
         // these are measured in terrain cells that are twice bigger than cells/tiles
-        var cameraPosition = Over.LocalToCell(Camera.transform.position) / 2;
-        var cameraMove = CameraPositionInTerrainCellsWhenLastGenerate - cameraPosition;
 
-        if (cameraMove.x >= 1)
+        var cameraPositionX = Camera.transform.position.x / TerrainMap.CellSize.x;
+        var cameraPositionY = Camera.transform.position.y / TerrainMap.CellSize.y;
+
+        //var cameraMovedX = CameraPositionWhenLastGenerateX - cameraPositionX;
+        //var cameraMovedY = CameraPositionWhenLastGenerateY - cameraPositionY;
+
+        //var cameraMovedChunkX = (cameraMovedX >= ChunkWidth || cameraMovedX <= -ChunkWidth);
+        //var cameraMovedChunkY = (cameraMovedY >= ChunkHeight || cameraMovedY <= -ChunkHeight);
+
+        var cameraPositionInChunksX = (int)Math.Round(cameraPositionX / ChunkWidth);
+        var cameraPositionInChunksY = (int)Math.Round(cameraPositionY / ChunkHeight);
+
+        //Debug.Log($"cameraPositionInChunksX {cameraPositionInChunksX}, cameraPositionInChunksY {cameraPositionInChunksY}");
+
+        //if (cameraMovedChunkX || cameraMovedChunkY)
+        //{
+
+
+        // this isnt necessary to check in every update, but only when moved across chunk. But its fast enough for now :-) 
+
+        for (int x = -2; x <= 2; x++)
         {
-            var x = cameraPosition.x - MapMinWidth / 2;
-            for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
+            for (int y = -2; y <= 2; y++)
             {
-                var y = cameraPosition.y + i;
-                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
+                if (!Chunks.ContainsKey((cameraPositionInChunksX + x, cameraPositionInChunksY + y)))
+                {
+                    GenerateTerrainChunk(cameraPositionInChunksX + x, cameraPositionInChunksY + y);
+                }
             }
-            CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-            cameraMoved = true;
         }
 
-        if (cameraMove.x <= -1)
-        {
-            var x = cameraPosition.x + MapMinWidth / 2 - 1;
-            for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
-            {
-                var y = cameraPosition.y + i;
-                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
-            }
-            CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-            cameraMoved = true;
-        }
-
-        if (cameraMove.y >= 1)
-        {
-            var y = cameraPosition.y - MapMinHeight / 2;
-            for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
-            {
-                var x = cameraPosition.x + i;
-                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
-            }
-            CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-            cameraMoved = true;
-        }
-
-        if (cameraMove.y <= -1)
-        {
-            var y = cameraPosition.y + MapMinHeight / 2 - 1;
-            for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
-            {
-                var x = cameraPosition.x + i;
-                if (GetTerrain(x, y) == Terrain.Empty) SetTerrain(x, y, GenerateTerrain(x, y));
-            }
-            CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-            cameraMoved = true;
-        }
+        //    if (cameraMovedChunkX) CameraPositionWhenLastGenerateX = cameraPositionX;
+        //    if (cameraMovedChunkY) CameraPositionWhenLastGenerateY = cameraPositionY;
+        //}
 
 
-        // good enough for now, can be optimized
-        if (cameraMoved)
-        {
-            SetUnSettedTiles();
-        }
 
-        cameraMoved = false;
+
+
+
+
+
+
+
+
+        //if (cameraMovedX >= ChunkWidth)
+        //{
+        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
+        //    CameraPositionWhenLastGenerateX = cameraPositionX;
+
+        //}
+
+        //if (cameraMovedX <= -ChunkWidth)
+        //{
+        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
+        //    CameraPositionWhenLastGenerateX = cameraPositionX;
+
+        //}
+
+        //if (cameraMovedY >= ChunkWidth)
+        //{
+        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
+        //    CameraPositionWhenLastGenerateY = cameraPositionY;
+
+        //}
+
+        //if (cameraMovedY <= -ChunkWidth)
+        //{
+        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
+        //    CameraPositionWhenLastGenerateY = cameraPositionY;
+
+        //}
+
+
+
+
+        //if (cameraMove.x >= 1)
+        //{
+        //    var x = cameraPosition.x - MapMinWidth / 2;
+        //    for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
+        //    {
+        //        var y = cameraPosition.y + i;
+        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
+        //    }
+        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
+
+        //}
+
+        //if (cameraMove.x <= -1)
+        //{
+        //    var x = cameraPosition.x + MapMinWidth / 2 - 1;
+        //    for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
+        //    {
+        //        var y = cameraPosition.y + i;
+        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
+        //    }
+        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
+
+        //}
+
+        //if (cameraMove.y >= 1)
+        //{
+        //    var y = cameraPosition.y - MapMinHeight / 2;
+        //    for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
+        //    {
+        //        var x = cameraPosition.x + i;
+        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
+        //    }
+        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
+
+        //}
+
+        //if (cameraMove.y <= -1)
+        //{
+        //    var y = cameraPosition.y + MapMinHeight / 2 - 1;
+        //    for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
+        //    {
+        //        var x = cameraPosition.x + i;
+        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
+        //    }
+        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
+
+        //}
+
+
     }
 
 }
