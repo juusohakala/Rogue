@@ -41,27 +41,38 @@ public class AutoTileMapper : MonoBehaviour
     //    }
     //}
 
-    Vector3Int FinalTilePosition(int x, int y, int corner)
+    void SetTile(Tilemap tilemap, int x, int y, int corner, TerrainMap.Terrain? terrain, AutoTileset.TilePosition tilePos)
     {
+        if (terrain == null) return;
+        if (!Tilesets.TryGetValue((TerrainMap.Terrain)terrain, out var tileset)) return;
+        if (!tileset.Tiles.TryGetValue(tilePos, out var tiles)) return;
+        if (tiles.Length == 0) return;
+
+        var tile = tiles[0];
+        if (tiles.Length > 1) tile = tiles[UnityEngine.Random.Range(0, tiles.Length - 1)];
+
         var tileX = x * 2;
         var tileY = y * 2;
 
-        return
+        var finalTilePosition =
             (corner == 1) ? new Vector3Int(tileX + 1, tileY + 1, 0)
             : (corner == 2) ? new Vector3Int(tileX, tileY + 1, 0)
             : (corner == 3) ? new Vector3Int(tileX, tileY, 0)
             : (corner == 4) ? new Vector3Int(tileX + 1, tileY, 0)
             : new Vector3Int();
+
+        tilemap.SetTile(finalTilePosition, tile);
     }
 
-    void SetOver(int x, int y, int corner, AutoTileset tileset, AutoTileset.TilePosition tilePos)
+
+    void SetOver(int x, int y, int corner, TerrainMap.Terrain? terrain, AutoTileset.TilePosition tilePos)
     {
-        Over.SetTile(FinalTilePosition(x, y, corner), tileset.Tiles[tilePos][0]);
+        SetTile(Over, x, y, corner, terrain, tilePos);
     }
 
-    void SetUnder(int x, int y, int corner, AutoTileset tileset)
+    void SetUnder(int x, int y, int corner, TerrainMap.Terrain? terrain)
     {
-        Under.SetTile(FinalTilePosition(x, y, corner), tileset.Tiles[AutoTileset.TilePosition.Middle][0]);
+        SetTile(Under, x, y, corner, terrain, AutoTileset.TilePosition.Middle);
     }
 
 
@@ -92,11 +103,7 @@ public class AutoTileMapper : MonoBehaviour
             // Terrains:
             foreach (TerrainMap.Terrain terrain in Enum.GetValues(typeof(TerrainMap.Terrain)))
             {
-                if (!Tilesets.TryGetValue(terrain, out var tileset))
-                {
-                    Debug.LogWarning($"AutoTileset not found for terrain \"{terrain}\"");
-                    continue;
-                }
+
 
                 if (TerrainMap.GetTerrain(x, y) == terrain)
                 {
@@ -114,12 +121,20 @@ public class AutoTileMapper : MonoBehaviour
                                     ? AutoTileset.TilePosition.Right
                                     : AutoTileset.TilePosition.TopRight;
 
-                    SetOver(x, y, 1, tileset, tilepos1);
+                    SetOver(x, y, 1, terrain, tilepos1);
 
-                    //if (tilepos1 == AutoTileset.TilePosition.Left)
-                    //{
-                    //    Under.SetTile(new Vector3Int(tileX + 1, tileY + 1, 0), tileset2.Tiles[AutoTileset.TilePosition.Middle][0]);
-                    //}
+                    if (tilepos1 == AutoTileset.TilePosition.Top)
+                        SetUnder(x, y, 1, TerrainMap.GetTerrain(x, y + 1));
+                    if (tilepos1 == AutoTileset.TilePosition.Right)
+                        SetUnder(x, y, 1, TerrainMap.GetTerrain(x + 1, y));
+                    if (tilepos1 == AutoTileset.TilePosition.InsideTopRight)
+                        SetUnder(x, y, 1, TerrainMap.GetTerrain(x + 1, y + 1));
+                    if (tilepos1 == AutoTileset.TilePosition.TopRight)
+                    {
+                        var t1 = (int)TerrainMap.GetTerrain(x, y + 1);
+                        var t2 = (int)TerrainMap.GetTerrain(x + 1, y);
+                        SetUnder(x, y, 1, (TerrainMap.Terrain)Math.Max(t1, t2));
+                    }
 
 
 
@@ -136,7 +151,20 @@ public class AutoTileMapper : MonoBehaviour
                                     ? AutoTileset.TilePosition.Left
                                     : AutoTileset.TilePosition.TopLeft;
 
-                    SetOver(x, y, 2, tileset, tilepos2);
+                    SetOver(x, y, 2, terrain, tilepos2);
+
+                    if (tilepos2 == AutoTileset.TilePosition.Top)
+                        SetUnder(x, y, 2, TerrainMap.GetTerrain(x, y + 1));
+                    if (tilepos2 == AutoTileset.TilePosition.Left)
+                        SetUnder(x, y, 2, TerrainMap.GetTerrain(x - 1, y));
+                    if (tilepos2 == AutoTileset.TilePosition.InsideTopLeft)
+                        SetUnder(x, y, 2, TerrainMap.GetTerrain(x - 1, y + 1));
+                    if (tilepos2 == AutoTileset.TilePosition.TopLeft)
+                    {
+                        var t1 = (int)TerrainMap.GetTerrain(x, y + 1);
+                        var t2 = (int)TerrainMap.GetTerrain(x - 1, y);
+                        SetUnder(x, y, 2, (TerrainMap.Terrain)Math.Max(t1, t2));
+                    }
 
 
                     // 3. Bottom Left tile
@@ -151,7 +179,20 @@ public class AutoTileMapper : MonoBehaviour
                                     ? AutoTileset.TilePosition.Left
                                     : AutoTileset.TilePosition.BottomLeft;
 
-                    SetOver(x, y, 3, tileset, tilepos3);
+                    SetOver(x, y, 3, terrain, tilepos3);
+
+                    if (tilepos3 == AutoTileset.TilePosition.Bottom)
+                        SetUnder(x, y, 3, TerrainMap.GetTerrain(x, y - 1));
+                    if (tilepos3 == AutoTileset.TilePosition.Left)
+                        SetUnder(x, y, 3, TerrainMap.GetTerrain(x - 1, y));
+                    if (tilepos3 == AutoTileset.TilePosition.InsideBottomLeft)
+                        SetUnder(x, y, 3, TerrainMap.GetTerrain(x - 1, y - 1));
+                    if (tilepos3 == AutoTileset.TilePosition.BottomLeft)
+                    {
+                        var t1 = (int)TerrainMap.GetTerrain(x, y - 1);
+                        var t2 = (int)TerrainMap.GetTerrain(x - 1, y);
+                        SetUnder(x, y, 3, (TerrainMap.Terrain)Math.Max(t1, t2));
+                    }
 
 
                     // 4. Bottom Right tile
@@ -166,9 +207,20 @@ public class AutoTileMapper : MonoBehaviour
                                     ? AutoTileset.TilePosition.Right
                                     : AutoTileset.TilePosition.BottomRight;
 
-                    SetOver(x, y, 4, tileset, tilepos4);
+                    SetOver(x, y, 4, terrain, tilepos4);
 
-
+                    if (tilepos4 == AutoTileset.TilePosition.Bottom)
+                        SetUnder(x, y, 4, TerrainMap.GetTerrain(x, y - 1));
+                    if (tilepos4 == AutoTileset.TilePosition.Right)
+                        SetUnder(x, y, 4, TerrainMap.GetTerrain(x + 1, y));
+                    if (tilepos4 == AutoTileset.TilePosition.InsideBottomRight)
+                        SetUnder(x, y, 4, TerrainMap.GetTerrain(x + 1, y - 1));
+                    if (tilepos4 == AutoTileset.TilePosition.BottomRight)
+                    {
+                        var t1 = (int)TerrainMap.GetTerrain(x, y - 1);
+                        var t2 = (int)TerrainMap.GetTerrain(x + 1, y);
+                        SetUnder(x, y, 4, (TerrainMap.Terrain)Math.Max(t1, t2));
+                    }
 
 
                 }
@@ -202,6 +254,18 @@ public class AutoTileMapper : MonoBehaviour
 
             Tilesets.Add((TerrainMap.Terrain)key, c2);
         }
+
+        // tee sama tarkistus kaikilel yksittäisille Tileille (tileposition) !
+        // check all terrains has tileset:
+        foreach (TerrainMap.Terrain terrain in Enum.GetValues(typeof(TerrainMap.Terrain)))
+        {
+            if (!Tilesets.ContainsKey(terrain))
+            {
+                Debug.LogError($"AutoTileset not found for terrain \"{terrain}\"");
+
+            }
+        }
+
 
         //SetUnSettedTiles();
 
