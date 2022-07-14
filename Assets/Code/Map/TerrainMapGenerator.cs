@@ -95,39 +95,19 @@ public class TerrainMapGenerator : MonoBehaviour
         Camera = Camera.main;
 
         Chunks = new Dictionary<(int, int), bool>();
-
-        // Generate first map to 0,0 that just covers the camera
-
-
-
     }
 
     // Update is called once per frame
     void Update()
     {
 
-
-        // here could be something to optimize :-)
-
         // these are measured in terrain cells that are twice bigger than cells/tiles
 
         var cameraPositionX = Camera.transform.position.x / TerrainMap.CellSize.x;
         var cameraPositionY = Camera.transform.position.y / TerrainMap.CellSize.y;
 
-        //var cameraMovedX = CameraPositionWhenLastGenerateX - cameraPositionX;
-        //var cameraMovedY = CameraPositionWhenLastGenerateY - cameraPositionY;
-
-        //var cameraMovedChunkX = (cameraMovedX >= ChunkWidth || cameraMovedX <= -ChunkWidth);
-        //var cameraMovedChunkY = (cameraMovedY >= ChunkHeight || cameraMovedY <= -ChunkHeight);
-
         var cameraPositionInChunksX = (int)Math.Round(cameraPositionX / ChunkWidth);
         var cameraPositionInChunksY = (int)Math.Round(cameraPositionY / ChunkHeight);
-
-        //Debug.Log($"cameraPositionInChunksX {cameraPositionInChunksX}, cameraPositionInChunksY {cameraPositionInChunksY}");
-
-        //if (cameraMovedChunkX || cameraMovedChunkY)
-        //{
-
 
         // this isnt necessary to check in every update, but only when moved across chunk. But its fast enough for now :-) 
 
@@ -141,101 +121,5 @@ public class TerrainMapGenerator : MonoBehaviour
                 }
             }
         }
-
-        //    if (cameraMovedChunkX) CameraPositionWhenLastGenerateX = cameraPositionX;
-        //    if (cameraMovedChunkY) CameraPositionWhenLastGenerateY = cameraPositionY;
-        //}
-
-
-
-
-
-
-
-
-
-
-
-        //if (cameraMovedX >= ChunkWidth)
-        //{
-        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
-        //    CameraPositionWhenLastGenerateX = cameraPositionX;
-
-        //}
-
-        //if (cameraMovedX <= -ChunkWidth)
-        //{
-        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
-        //    CameraPositionWhenLastGenerateX = cameraPositionX;
-
-        //}
-
-        //if (cameraMovedY >= ChunkWidth)
-        //{
-        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
-        //    CameraPositionWhenLastGenerateY = cameraPositionY;
-
-        //}
-
-        //if (cameraMovedY <= -ChunkWidth)
-        //{
-        //    GenerateTerrainChunk((int)(cameraPositionX / ChunkWidth), (int)(cameraPositionY / ChunkHeight));
-        //    CameraPositionWhenLastGenerateY = cameraPositionY;
-
-        //}
-
-
-
-
-        //if (cameraMove.x >= 1)
-        //{
-        //    var x = cameraPosition.x - MapMinWidth / 2;
-        //    for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
-        //    {
-        //        var y = cameraPosition.y + i;
-        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
-        //    }
-        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-
-        //}
-
-        //if (cameraMove.x <= -1)
-        //{
-        //    var x = cameraPosition.x + MapMinWidth / 2 - 1;
-        //    for (var i = -MapMinHeight / 2; i < MapMinHeight / 2; i++)
-        //    {
-        //        var y = cameraPosition.y + i;
-        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
-        //    }
-        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-
-        //}
-
-        //if (cameraMove.y >= 1)
-        //{
-        //    var y = cameraPosition.y - MapMinHeight / 2;
-        //    for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
-        //    {
-        //        var x = cameraPosition.x + i;
-        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
-        //    }
-        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-
-        //}
-
-        //if (cameraMove.y <= -1)
-        //{
-        //    var y = cameraPosition.y + MapMinHeight / 2 - 1;
-        //    for (var i = -MapMinWidth / 2; i < MapMinWidth / 2; i++)
-        //    {
-        //        var x = cameraPosition.x + i;
-        //        if (TerrainMap.GetTerrain((int)x, (int)y) == TerrainMap.Terrain.Empty) TerrainMap.SetTerrain((int)x, (int)y, GenerateTerrain((int)x, (int)y));
-        //    }
-        //    CameraPositionInTerrainCellsWhenLastGenerate = cameraPosition;
-
-        //}
-
-
     }
-
 }

@@ -9,37 +9,12 @@ public class AutoTileMapper : MonoBehaviour
     [Header("TerrainMap:")]
     public TerrainMap TerrainMap;
 
-    //[Header("Tilesets:")]
-    //public AutoTileset[] AutoTilesets;
-
     [Header("Tilemaps:")]
     public Tilemap Over;
     public Tilemap Under;
 
     private Dictionary<TerrainMap.Terrain, AutoTileset> Tilesets;
 
-
-    //public void SetUnSettedTiles()
-    //{
-    //    for (int i = KeysOfUnSettedTiles.Count - 1; i >= 0; i--)
-    //    {
-    //        var x = KeysOfUnSettedTiles[i].Item1;
-    //        var y = KeysOfUnSettedTiles[i].Item2;
-    //        if (
-    //                  Data.ContainsKey((x, y + 1))
-    //            && Data.ContainsKey((x + 1, y + 1))
-    //            && Data.ContainsKey((x + 1, y))
-    //            && Data.ContainsKey((x + 1, y - 1))
-    //            && Data.ContainsKey((x, y - 1))
-    //            && Data.ContainsKey((x - 1, y - 1))
-    //            && Data.ContainsKey((x - 1, y))
-    //            && Data.ContainsKey((x - 1, y + 1)))
-    //        {
-    //            SetTiles(x, y);
-    //            KeysOfUnSettedTiles.RemoveAt(i);
-    //        }
-    //    }
-    //}
 
     void SetTile(Tilemap tilemap, int x, int y, int corner, TerrainMap.Terrain? terrain, AutoTileset.TilePosition tilePos)
     {
@@ -234,14 +209,8 @@ public class AutoTileMapper : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //for (var i = 0; i < AutoTilesets.Length; i++)
-        //{
-        //    AutoTilesets[i] = Instantiate(AutoTilesets[i]);
-        //}
 
         Tilesets = new Dictionary<TerrainMap.Terrain, AutoTileset>();
-
-
 
         foreach (Transform c in transform)
         {
@@ -266,36 +235,14 @@ public class AutoTileMapper : MonoBehaviour
             }
         }
 
-
-        //SetUnSettedTiles();
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        //var newestKey = TerrainMap.TakeNewestKey();
+        var tilesDrawnByFrame = 30;
 
-        //if (newestKey != null)
-        //{
-        //    var x = newestKey.Value.Item1;
-        //    var y = newestKey.Value.Item2;
-
-        //    if (TerrainMap.GetTerrain(x, y) != TerrainMap.Terrain.Empty) SetTiles(x, y);
-
-        //    if (TerrainMap.GetTerrain(x, y + 1) != TerrainMap.Terrain.Empty) SetTiles(x, y + 1);
-        //    if (TerrainMap.GetTerrain(x + 1, y) != TerrainMap.Terrain.Empty) SetTiles(x + 1, y);
-        //    if (TerrainMap.GetTerrain(x, y - 1) != TerrainMap.Terrain.Empty) SetTiles(x, y - 1);
-        //    if (TerrainMap.GetTerrain(x - 1, y) != TerrainMap.Terrain.Empty) SetTiles(x - 1, y);
-
-        //    if (TerrainMap.GetTerrain(x + 1, y + 1) != TerrainMap.Terrain.Empty) SetTiles(x + 1, y + 1);
-        //    if (TerrainMap.GetTerrain(x + 1, y - 1) != TerrainMap.Terrain.Empty) SetTiles(x + 1, y - 1);
-        //    if (TerrainMap.GetTerrain(x - 1, y - 1) != TerrainMap.Terrain.Empty) SetTiles(x - 1, y - 1);
-        //    if (TerrainMap.GetTerrain(x - 1, y + 1) != TerrainMap.Terrain.Empty) SetTiles(x - 1, y + 1);
-
-        //}
-
-        for (var i = 0; i < 30; i++)
+        for (var i = 0; i < tilesDrawnByFrame; i++)
         {
             var key = TerrainMap.TakeReadyKey();
 

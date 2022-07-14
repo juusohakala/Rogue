@@ -16,9 +16,7 @@ public class TerrainMap : MonoBehaviour
     public Vector3 CellSize;
 
     private Dictionary<(int, int), Terrain> Data;
-    private List<(int, int)> NewestKeys;
-
-    private List<(int, int)> ReadyKeys; // this is new way to go
+    private List<(int, int)> ReadyKeys;
 
     public Terrain? GetTerrain(int x, int y)
     {
@@ -29,15 +27,6 @@ public class TerrainMap : MonoBehaviour
         }
 
         return null;
-    }
-
-    public (int, int)? TakeNewestKey()
-    {
-        if (NewestKeys.Count == 0) return null;
-
-        var key = NewestKeys.Last();
-        NewestKeys.Remove(key);
-        return key;
     }
 
     public (int, int)? TakeReadyKey()
@@ -69,7 +58,6 @@ public class TerrainMap : MonoBehaviour
         else
         {
             Data.Add((x, y), terrain);
-            //NewestKeys.Add((x, y));
         }
 
     }
@@ -79,14 +67,12 @@ public class TerrainMap : MonoBehaviour
     void Start()
     {
         Data = new Dictionary<(int, int), Terrain>();
-        NewestKeys = new List<(int, int)>();
-
         ReadyKeys = new List<(int, int)>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        var a = "";
+
     }
 }
